@@ -35,9 +35,6 @@ def stream_to_server():
                 requests.post(SERVER_URL, data=buffer.tobytes(), headers={"Content-Type": "image/jpeg"})
             except requests.exceptions.RequestException as e:
                 print(f"Failed to send frame: {e}")
-            # Yield as an MJPEG stream
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
 if __name__ == '__main__':
     stream_to_server()
