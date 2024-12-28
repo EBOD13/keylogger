@@ -1,14 +1,15 @@
-from flask import Flask, Response
 import cv2
-import numpy as np
 import mss
+import numpy as np
 import pyautogui
-import requests
+from flask import Flask, Response
 
-# Define a server link to send the video stream
-SERVER_URL = ""
+# Flask application
+app = Flask(__name__)
+
+
 # Function to capture the screen with mouse cursor and yield frames
-def stream_to_server():
+def generate_frames():
     with mss.mss() as sct:
         monitor = sct.monitors[1]  # Primary monitor
         while True:
@@ -29,12 +30,21 @@ def stream_to_server():
 
             # Encode the frame in JPEG format
             _, buffer = cv2.imencode('.jpg', frame)
-            frame_bytes = buffer.tobytes
+            frame_bytes = buffer.tobytes()
 
-            try:
-                requests.post(SERVER_URL, data=buffer.tobytes(), headers={"Content-Type": "image/jpeg"})
-            except requests.exceptions.RequestException as e:
-                print(f"Failed to send frame: {e}")
+            # Yield as an MJPEG stream
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
+
+# Route to serve the live stream
+
+# TODO: Make this route private
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+# Run the Flask app
 if __name__ == '__main__':
-    stream_to_server()
+    app.run(host='0.0.0.0', port=3000, debug=True)
